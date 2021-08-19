@@ -1,0 +1,13 @@
+*.tgz
+*.xlsx
+*~
+.DS_Store
+.Thumbs
+._*
+.idea/
+build/
+node_modules
+npm-debug.log*
+package-lock.json
+src/*.js
+test/*.js
