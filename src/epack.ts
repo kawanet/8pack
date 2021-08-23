@@ -10,7 +10,7 @@ import {getReadRouter, getWriteRouter} from "./router";
 
 const ceil1K = (num: number) => (((num + 1023) >> 10) << 10);
 
-class Epack implements eightpack.Ipack<Uint8Array> {
+export class Epack implements eightpack.Ipack<Uint8Array> {
     bufSize = defaults.initialBufferSize;
 
     decode<T = any>(data: Uint8Array, options?: eightpack.DecodeOptions): T {

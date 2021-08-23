@@ -9,18 +9,35 @@ TBD
 ## SYNOPSIS
 
 ```js
-const {bpack} = require("8pack");
-const {bpack} = require("./");
+const {epack} = require("8pack");
 
 const object = {text: "string", data: new Uint8Array([1, 2, 3, 4])};
 
-const encoded = bpack.encode(object); // => Uint8Array
-const decoded = bpack.decode(encoded); // => object
+const encoded = epack.encode(object); // => Uint8Array
+const decoded = epack.decode(encoded); // => object
 (decoded.data instanceof Uint8Array); // => true
+```
 
+Good old `JSON.stringify()` does not support binary on the other hand.
+
+```js
 const encoded = JSON.string(object); // => string
 const decoded = bpack.decode(encoded); // => object
 (decoded.data instanceof Uint8Array); // => false
+```
+
+### Node.js
+
+`bpack` is available to encode to and decode from [Buffer](https://nodejs.org/api/buffer.html) on Node.js.
+
+```js
+const {bpack} = require("8pack");
+
+const object = {text: "string", data: new Buffer([1, 2, 3, 4])};
+
+const encoded = bpack.encode(object); // => Buffer
+const decoded = bpack.decode(encoded); // => object
+(decoded.data instanceof Buffer); // => true
 ```
 
 ### Types

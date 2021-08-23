@@ -1,10 +1,14 @@
+import {bpack} from "../src";
+
 /**
  * @see https://github.com/kawanet/8pack
  */
 
-export const {epack, handlers} = eightpack;
+export const {bpack, epack, handlers} = eightpack;
 
 export declare module eightpack {
+    const bpack: Ipack<Buffer>;
+
     const epack: Ipack<Uint8Array>;
 
     const handlers: Handlers;
