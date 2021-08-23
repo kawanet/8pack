@@ -7,44 +7,66 @@ import {SerializationTag as Tag, ArrayBufferViewTag as ST} from "./enum";
 
 type Handler<T> = eightpack.Handler<T>;
 
-const nameToSubtag: { [name: string]: ST } = {
-    Int8Array: ST.kInt8Array,
-    Uint8Array: ST.kUint8Array,
-    Uint8ClampedArray: ST.kUint8ClampedArray,
-    Int16Array: ST.kInt16Array,
-    Uint16Array: ST.kUint16Array,
-    Int32Array: ST.kInt32Array,
-    Uint32Array: ST.kUint32Array,
-    Float32Array: ST.kFloat32Array,
-    Float64Array: ST.kFloat64Array,
-    BigInt64Array: ST.kBigInt64Array,
-    BigUint64Array: ST.kBigUint64Array,
-    DataView: ST.kDataView,
-};
+/**
+ * subset interface of TypedArray constructor
+ */
 
-interface Fn {
+interface C {
     new(buffer: ArrayBuffer, byteOffset?: number, length?: number): ArrayBufferView;
 
     BYTES_PER_ELEMENT?: number;
 }
 
-const subtagToFn: Fn[] = [];
-subtagToFn[ST.kInt8Array] = Int8Array;
-subtagToFn[ST.kUint8Array] = Uint8Array;
-subtagToFn[ST.kUint8ClampedArray] = Uint8ClampedArray;
-subtagToFn[ST.kInt16Array] = Int16Array;
-subtagToFn[ST.kUint16Array] = Uint16Array;
-subtagToFn[ST.kInt32Array] = Int32Array;
-subtagToFn[ST.kUint32Array] = Uint32Array;
-subtagToFn[ST.kFloat32Array] = Float32Array;
-subtagToFn[ST.kFloat64Array] = Float64Array;
-subtagToFn[ST.kBigInt64Array] = ("undefined" !== typeof BigInt64Array) ? BigInt64Array : null;
-subtagToFn[ST.kBigUint64Array] = ("undefined" !== typeof BigUint64Array) ? BigUint64Array : null;
-subtagToFn[ST.kDataView] = DataView;
+/**
+ * Definition
+ */
 
-const defaultFn = Uint8Array;
+interface Type {
+    tag: number;
 
-const pickSubTag = (obj: ArrayBufferView): ST => nameToSubtag[obj?.constructor?.name];
+    size: number;
+
+    // Buffer.from()
+    from: (buffer: ArrayBuffer, byteOffset?: number, length?: number) => ArrayBufferView;
+
+    // Buffer.isBuffer()
+    match: (value: ArrayBufferView) => boolean;
+}
+
+const typeList: Type[] = [];
+const tagIndex: Type[] = [];
+
+const addType = (tag: number, fn: C): Type => {
+    const def = {} as Type;
+    def.tag = tag;
+    def.size = fn.BYTES_PER_ELEMENT || 1;
+    def.from = ((buffer, byteOffset, length) => new fn(buffer, byteOffset, length));
+    def.match = (value => value instanceof fn);
+    typeList.push(def);
+    tagIndex[tag] = def;
+    return def;
+};
+
+addType(ST.kInt8Array, Int8Array);
+addType(ST.kUint8Array, Uint8Array);
+addType(ST.kUint8ClampedArray, Uint8ClampedArray);
+addType(ST.kInt16Array, Int16Array);
+addType(ST.kUint16Array, Uint16Array);
+addType(ST.kInt32Array, Int32Array);
+addType(ST.kUint32Array, Uint32Array);
+addType(ST.kFloat32Array, Float32Array);
+addType(ST.kFloat64Array, Float64Array);
+if ("undefined" !== typeof BigInt64Array) addType(ST.kBigInt64Array, BigInt64Array);
+if ("undefined" !== typeof BigUint64Array) addType(ST.kBigUint64Array, BigUint64Array);
+addType(ST.kDataView, DataView);
+
+const defaultType = tagIndex[ST.kUint8Array];
+
+const pickSubTag = (obj: ArrayBufferView): number => {
+    for (const type of typeList) {
+        if (type.match(obj)) return type.tag;
+    }
+};
 
 /**
  * TypedArray
@@ -55,16 +77,17 @@ export const hArrayBufferView: Handler<ArrayBufferView> = {
 
     read: (buf) => {
         const subtag = buf.getUint8(2);
-        const fn = subtagToFn[subtag] || defaultFn;
+        const type = tagIndex[subtag] || defaultType;
+        const {from, size} = type;
 
         return buf.getU8Array((array, offset, length) => {
             const {buffer, byteOffset} = array;
-            const bytes = fn.BYTES_PER_ELEMENT || 1;
-            return new fn(buffer, byteOffset + offset, length / bytes);
+            return from(buffer, byteOffset + offset, length / size);
         });
     },
 
     match: value => ArrayBuffer.isView(value),
+
     ignoreToJSON: true,
 
     write: (buf, value) => {
