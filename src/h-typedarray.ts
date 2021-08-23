@@ -4,7 +4,6 @@
 
 import type {eightpack} from "../types/8pack";
 import {SerializationTag as Tag, ArrayBufferViewTag as ST} from "./enum";
-import * as Buffer from "./node-buffer";
 
 type Handler<T> = eightpack.Handler<T>;
 
@@ -69,13 +68,10 @@ const pickSubTag = (obj: ArrayBufferView): number => {
     }
 };
 
-if (Buffer) {
-    const {from, isBuffer: match} = Buffer;
-    if (from && match) {
-        const type: Type = {tag: ST.kBuffer, from: from, size: 1, match: match};
-        typeList.unshift(type); // insert at the top of the list
-        tagIndex[ST.kBuffer] = type;
-    }
+if ("undefined" !== typeof Buffer) {
+    const type: Type = {tag: ST.kBuffer, from: Buffer.from, size: 1, match: Buffer.isBuffer};
+    typeList.unshift(type); // insert at the top of the list
+    tagIndex[ST.kBuffer] = type;
 }
 
 /**

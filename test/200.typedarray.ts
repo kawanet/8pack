@@ -7,6 +7,13 @@ const TITLE = __filename.split("/").pop();
 
 type Filter = (num: number) => any;
 
+const toHex = (obj: ArrayBufferView | number[]) => {
+    if (ArrayBuffer.isView(obj)) {
+        obj = Array.from(new Uint8Array(obj.buffer, obj.byteOffset, obj.byteLength));
+    }
+    return obj.map(v => (0x100 | v).toString(16).substring(1)).join("-").toUpperCase();
+};
+
 interface Fn {
     new(length: number): ArrayBufferView;
 }
@@ -27,6 +34,8 @@ describe(TITLE, () => {
     test("BigUint64Array", ("undefined" !== typeof BigUint64Array) ? BigUint64Array : null, toBigInt);
 
     it("TypedArray[]", () => {
+        assert(toHex([10, 11, 12, 13, 14, 15]), "0a-0b-0c-0d-0e-0f");
+
         const data = [
             new Int8Array([1]),
             new Uint8Array([2]),
@@ -43,7 +52,10 @@ describe(TITLE, () => {
         const decoded = epack.decode(encoded);
 
         assert.equal(decoded.length, data.length);
-        assert.deepEqual(decoded, data);
+
+        for (let i = 0; i < decoded.length; i++) {
+            assert.deepEqual(toHex(decoded[i]), toHex(data[i]));
+        }
     });
 
     it("DataView", () => {
@@ -54,11 +66,9 @@ describe(TITLE, () => {
 
             const decoded = epack.decode(epack.encode(data));
             assert.equal(decoded?.constructor?.name, data.constructor.name);
-            assert.deepEqual(decoded, data);
+            assert.equal(toHex(decoded), toHex(data));
         });
     })
-
-    // test("DataView", DataView);
 
     function test(title: string, fn: Fn, filter?: Filter) {
         const IT = fn ? it : it.skip;
@@ -67,11 +77,14 @@ describe(TITLE, () => {
         IT(title, () => {
             [0, 10, 100, 1000].forEach(size => {
                 const data = new fn(size) as any as number[];
+                assert.equal(data.length, size);
+
                 for (let i = 0; i < size; i++) data[i] = filter(i);
 
                 const decoded = epack.decode(epack.encode(data));
                 assert.equal(decoded?.constructor?.name, data.constructor.name);
-                assert.deepEqual(decoded, data);
+                assert.equal(decoded.length, size);
+                assert.equal(toHex(decoded), toHex(data));
             });
         })
     }

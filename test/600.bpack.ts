@@ -2,11 +2,10 @@
 
 import {strict as assert} from "assert";
 import {bpack} from "../";
-import * as Buffer from "../src/node-buffer";
 
 const TITLE = __filename.split("/").pop();
 
-const DESCRIBE = Buffer?.from ? describe : describe.skip;
+const DESCRIBE = ("undefined" !== typeof Buffer) ? describe : describe.skip;
 
 DESCRIBE(TITLE, () => {
 

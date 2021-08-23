@@ -6,6 +6,9 @@
   "bin": {
     "8pack": "src/cli.js"
   },
+  "browser": {
+    "buffer": false
+  },
   "bugs": {
     "url": "https://github.com/kawanet/8pack/issues"
   },

@@ -4,7 +4,6 @@
 
 import type {eightpack} from "../types/8pack";
 import {Epack} from "./epack";
-import * as Buffer from "./node-buffer";
 
 /**
  * Node.js Buffer version of Epack
