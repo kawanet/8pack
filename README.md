@@ -49,6 +49,11 @@ SerializationTag
 | kArrayBuffer | `B` | `42 40 00 00 hh hh hh hh` `...` | ArrayBuffer | uint8[] |
 | kArrayBufferView | `V` | `56 40 SS 00 hh hh hh hh` `...` | TypedArray | uint8[] |
 | kExtension | 128-255 | `xx PL xx xx xx xx xx xx` | any | uint8[] |
+
+ArrayBufferViewTag
+
+| name | tag | hex | type or class | payload |
+|----|----|----|----|----|
 | kInt8Array | `b` | `56 40 62 00 hh hh hh hh` `...` |||
 | kUint8Array | `B` | `56 40 42 00 hh hh hh hh` `...` |||
 | kUint8ClampedArray | `C` | `56 40 43 00 hh hh hh hh` `...` |||
@@ -60,7 +65,8 @@ SerializationTag
 | kFloat64Array | `F` | `56 40 46 00 hh hh hh hh` `...` |||
 | kBigInt64Array | `q` | `56 40 71 00 hh hh hh hh` `...` |||
 | kBigUint64Array | `Q` | `56 40 51 00 hh hh hh hh` `...` |||
-| kDataView | `?` | `56 40 3F 00 hh hh hh hh` `...` |||
+| kDataView | `?` | `56 40 3f 00 hh hh hh hh` `...` |||
+| kBuffer | 255 | `56 40 ff 00 hh hh hh hh` `...` | Buffer ||
 
 ### Payload Layout Bitmask
 

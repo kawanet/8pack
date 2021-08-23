@@ -56,4 +56,5 @@ export const enum ArrayBufferViewTag {
     kBigInt64Array = 0x71, // q
     kBigUint64Array = 0x51, // Q
     kDataView = 0x3F, // ?
+    kBuffer = 0xFF, // 255
 }
